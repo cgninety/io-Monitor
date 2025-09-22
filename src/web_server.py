@@ -19,6 +19,10 @@ class WebServer:
         self.port = port
         self.debug = debug
         
+        # Setup logging first
+        logging.basicConfig(level=logging.INFO)
+        self.logger = logging.getLogger(__name__)
+        
         # Initialize Flask app and SocketIO
         self.app = Flask(__name__, 
                         template_folder='../templates',
@@ -43,9 +47,6 @@ class WebServer:
         # Setup routes and socket handlers
         self._setup_routes()
         self._setup_socket_handlers()
-        
-        logging.basicConfig(level=logging.INFO)
-        self.logger = logging.getLogger(__name__)
     
     def _setup_routes(self):
         """Setup Flask routes."""
