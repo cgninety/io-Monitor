@@ -1,0 +1,6 @@
+Flask==2.3.3
+Flask-SocketIO==5.3.6
+RPi.GPIO==0.7.1
+psutil==5.9.5
+eventlet==0.33.3
+python-socketio==5.8.0
