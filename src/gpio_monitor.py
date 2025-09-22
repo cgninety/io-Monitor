@@ -91,7 +91,8 @@ class GPIOMonitor:
         self.monitoring = True
         self.monitor_thread = threading.Thread(target=self._monitor_loop, daemon=True)
         self.monitor_thread.start()
-        self.logger.info("GPIO monitoring started")
+        self.logger.info(f"GPIO monitoring started - monitoring {len(self.pins_to_monitor)} pins every {self.update_interval}s")
+        self.logger.info(f"Callback set: {self.state_change_callback is not None}")
     
     def stop_monitoring(self):
         """Stop the GPIO monitoring thread."""
@@ -106,8 +107,16 @@ class GPIOMonitor:
     
     def _monitor_loop(self):
         """Main monitoring loop."""
+        loop_count = 0
+        self.logger.info("GPIO monitor loop started")
+        
         while self.monitoring:
             current_time = datetime.now()
+            loop_count += 1
+            
+            # Log every 1000 loops to show it's running
+            if loop_count % 1000 == 0:
+                self.logger.info(f"GPIO monitor loop running - iteration {loop_count}")
             
             for pin in self.pins_to_monitor:
                 old_state = self.pin_states.get(pin, 0)
@@ -121,8 +130,9 @@ class GPIOMonitor:
                 else:
                     # Simulation mode - occasionally flip states
                     import random
-                    if random.random() < 0.01:  # 1% chance to flip
+                    if random.random() < 0.02:  # 2% chance to flip (increased for testing)
                         new_state = 1 - old_state
+                        self.logger.info(f"SIMULATION: Flipping pin {pin} from {old_state} to {new_state}")
                     else:
                         new_state = old_state
                 
@@ -131,6 +141,8 @@ class GPIOMonitor:
                     self.pin_states[pin] = new_state
                     self.transition_counts[pin] += 1
                     self.last_transition_time[pin] = current_time
+                    
+                    self.logger.info(f"STATE CHANGE DETECTED: Pin {pin} changed from {old_state} to {new_state}")
                     
                     # Handle HIGH state duration tracking
                     if old_state == 1 and new_state == 0:  # Falling edge
@@ -145,14 +157,15 @@ class GPIOMonitor:
                     elif old_state == 0 and new_state == 1:  # Rising edge
                         self.current_high_start[pin] = current_time
                     
-                    self.logger.debug(f"Pin {pin} changed from {old_state} to {new_state}")
-                    
                     # Call immediate update callback if set
                     if self.state_change_callback:
                         try:
+                            self.logger.info(f"CALLING CALLBACK for pin {pin}")
                             self.state_change_callback(pin, new_state, old_state)
                         except Exception as e:
                             self.logger.error(f"Error in state change callback: {e}")
+                    else:
+                        self.logger.warning("No callback set for state changes!")
             
             time.sleep(self.update_interval)
     

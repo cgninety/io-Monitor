@@ -32,7 +32,9 @@ class WebServer:
         self.system_info = SystemInfoCollector()
         
         # Set up immediate GPIO state change callback
+        self.logger.info("Setting up GPIO state change callback...")
         self.gpio_monitor.set_state_change_callback(self._on_gpio_state_change)
+        self.logger.info("GPIO callback set successfully")
         
         # Background update thread
         self.update_thread = None
@@ -165,30 +167,42 @@ class WebServer:
     def _on_gpio_state_change(self, pin, new_state, old_state):
         """Callback function called immediately when a GPIO pin state changes."""
         try:
+            self.logger.info(f"CALLBACK RECEIVED: Pin {pin} changed {old_state} -> {new_state}")
+            
             # Send immediate update for the specific pin
             gpio_data = self.gpio_monitor.get_pin_status()
-            self.socketio.emit('gpio_update', gpio_data, namespace='/')
-            self.logger.info(f"Immediate update sent for pin {pin}: {old_state} -> {new_state}")
+            
+            # Use the server manager to emit to all clients
+            self.socketio.server.emit('gpio_update', gpio_data, namespace='/')
+            
+            self.logger.info(f"SOCKETIO EMIT SENT: Immediate update for pin {pin}")
+            
         except Exception as e:
             self.logger.error(f"Error sending immediate GPIO update: {e}")
+            import traceback
+            self.logger.error(traceback.format_exc())
     
     def _background_update_loop(self):
         """Background thread for sending periodic updates to connected clients."""
         gpio_update_counter = 0
         system_update_counter = 0
         
+        self.logger.info("Background update loop started")
+        
         while self.update_running:
             try:
                 # Send GPIO updates every 100ms as backup (immediate updates handle real-time changes)
                 if gpio_update_counter >= 1:  # 1 * 0.1s = 100ms
                     gpio_data = self.gpio_monitor.get_pin_status()
-                    self.socketio.emit('gpio_update', gpio_data, namespace='/')
+                    self.socketio.server.emit('gpio_update', gpio_data, namespace='/')
+                    self.logger.debug("Background GPIO update sent")
                     gpio_update_counter = 0
                 
                 # Send system updates every 1 second
                 if system_update_counter >= 10:  # 10 * 0.1s = 1s
                     system_data = self.system_info.get_lightweight_summary()
-                    self.socketio.emit('system_update', system_data, namespace='/')
+                    self.socketio.server.emit('system_update', system_data, namespace='/')
+                    self.logger.debug("Background system update sent")
                     system_update_counter = 0
                 
                 gpio_update_counter += 1
