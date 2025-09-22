@@ -31,6 +31,9 @@ class GPIOMonitor:
         self.high_duration_history = defaultdict(lambda: deque(maxlen=1000))
         self.current_high_start = {}
         
+        # Callback for immediate updates
+        self.state_change_callback = None
+        
         # Thread control
         self.monitoring = False
         self.monitor_thread = None
@@ -143,8 +146,23 @@ class GPIOMonitor:
                         self.current_high_start[pin] = current_time
                     
                     self.logger.debug(f"Pin {pin} changed from {old_state} to {new_state}")
+                    
+                    # Call immediate update callback if set
+                    if self.state_change_callback:
+                        try:
+                            self.state_change_callback(pin, new_state, old_state)
+                        except Exception as e:
+                            self.logger.error(f"Error in state change callback: {e}")
             
             time.sleep(self.update_interval)
+    
+    def set_state_change_callback(self, callback):
+        """Set a callback function to be called immediately when a pin state changes.
+        
+        Args:
+            callback: Function that takes (pin, new_state, old_state) as arguments
+        """
+        self.state_change_callback = callback
     
     def get_pin_status(self):
         """Get current status of all monitored pins."""
