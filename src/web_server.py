@@ -167,6 +167,8 @@ class WebServer:
     
     def _on_gpio_state_change(self, pin, new_state, old_state):
         """Callback function called immediately when a GPIO pin state changes."""
+        print(f"CALLBACK DEBUG: Pin {pin} changed {old_state} -> {new_state}")  # Debug print
+        
         try:
             self.logger.info(f"CALLBACK RECEIVED: Pin {pin} changed {old_state} -> {new_state}")
             
@@ -177,11 +179,14 @@ class WebServer:
             self.socketio.server.emit('gpio_update', gpio_data, namespace='/')
             
             self.logger.info(f"SOCKETIO EMIT SENT: Immediate update for pin {pin}")
+            print(f"SOCKETIO DEBUG: Sent update for pin {pin}")  # Debug print
             
         except Exception as e:
             self.logger.error(f"Error sending immediate GPIO update: {e}")
+            print(f"CALLBACK ERROR: {e}")  # Debug print
             import traceback
             self.logger.error(traceback.format_exc())
+            print(traceback.format_exc())  # Debug print
     
     def _background_update_loop(self):
         """Background thread for sending periodic updates to connected clients."""
