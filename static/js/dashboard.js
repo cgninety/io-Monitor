@@ -16,8 +16,14 @@ class GPIODashboard {
     }
     
     initializeSocket() {
-        // Initialize Socket.IO connection
-        this.socket = io();
+        // Initialize Socket.IO connection with optimized settings
+        this.socket = io({
+            transports: ['websocket', 'polling'],
+            upgrade: true,
+            rememberUpgrade: true,
+            timeout: 5000,
+            forceNew: true
+        });
         
         // Connection event handlers
         this.socket.on('connect', () => {
@@ -30,13 +36,18 @@ class GPIODashboard {
             this.updateConnectionStatus(false);
         });
         
-        // Data event handlers
+        // Data event handlers with immediate processing
         this.socket.on('gpio_update', (data) => {
-            this.updateGPIOStatus(data);
+            // Process immediately without any delays
+            requestAnimationFrame(() => {
+                this.updateGPIOStatus(data);
+            });
         });
         
         this.socket.on('system_update', (data) => {
-            this.updateSystemInfo(data);
+            requestAnimationFrame(() => {
+                this.updateSystemInfo(data);
+            });
         });
         
         this.socket.on('pin_history', (data) => {
@@ -94,9 +105,39 @@ class GPIODashboard {
     
     updateGPIOStatus(data) {
         this.currentPinData = data;
-        this.renderGPIOGrid(data);
+        this.renderGPIOGridOptimized(data);
         this.renderCountersGrid(data);
         this.updateChartPinSelect(data);
+    }
+    
+    renderGPIOGridOptimized(data) {
+        const grid = document.getElementById('gpioGrid');
+        
+        // Sort pins numerically
+        const sortedPins = Object.keys(data).sort((a, b) => parseInt(a) - parseInt(b));
+        
+        // If grid is empty, create all elements
+        if (grid.children.length === 0) {
+            sortedPins.forEach(pin => {
+                const pinData = data[pin];
+                const pinElement = this.createPinElement(pin, pinData);
+                grid.appendChild(pinElement);
+            });
+        } else {
+            // Update existing elements
+            sortedPins.forEach((pin, index) => {
+                const pinData = data[pin];
+                const existingElement = grid.children[index];
+                
+                if (existingElement) {
+                    this.updatePinElement(existingElement, pin, pinData);
+                } else {
+                    // Create new element if it doesn't exist
+                    const pinElement = this.createPinElement(pin, pinData);
+                    grid.appendChild(pinElement);
+                }
+            });
+        }
     }
     
     renderGPIOGrid(data) {
@@ -134,6 +175,32 @@ class GPIODashboard {
         });
         
         return div;
+    }
+    
+    updatePinElement(element, pin, pinData) {
+        // Update class for state change with immediate visual feedback
+        const newClassName = `gpio-pin state-${pinData.state ? 'high' : 'low'}`;
+        if (element.className !== newClassName) {
+            element.className = newClassName;
+            // Add a quick flash effect for state changes
+            element.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                element.style.transform = 'scale(1)';
+            }, 100);
+        }
+        
+        // Update title
+        element.title = `${pinData.label} - Transitions: ${pinData.transitions}`;
+        
+        // Update content
+        const currentDuration = pinData.current_high_duration;
+        const durationText = currentDuration > 0 ? this.formatDuration(currentDuration) : '';
+        
+        element.innerHTML = `
+            <div class="pin-number">GPIO ${pin}</div>
+            <div class="pin-label">${pinData.label}</div>
+            ${durationText ? `<div class="pin-duration">${durationText}</div>` : ''}
+        `;
     }
     
     renderCountersGrid(data) {
