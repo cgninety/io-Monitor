@@ -22,7 +22,7 @@ A comprehensive GPIO monitoring system for Raspberry Pi Zero 2W with a real-time
 1. **Clone or copy the project to your Raspberry Pi:**
    ```bash
    git clone https://github.com/cgninety/io-Monitor
-   cd rpi-io-Monitor
+   cd io-Monitor
    ```
 
 2. **Install Python dependencies:**
@@ -71,3 +71,4 @@ The web dashboard provides:
 
 
 MIT License
+
