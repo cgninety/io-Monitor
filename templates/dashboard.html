@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raspberry Pi GPIO Monitor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1><i class="icon">🔌</i> Raspberry Pi GPIO Monitor</h1>
+            <div class="header-controls">
+                <button id="resetCounters" class="btn btn-warning">Reset Counters</button>
+                <div class="connection-status" id="connectionStatus">
+                    <span class="status-indicator offline"></span>
+                    <span class="status-text">Connecting...</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- System Information Panel -->
+        <section class="system-panel">
+            <h2><i class="icon">📊</i> System Information</h2>
+            <div class="system-grid">
+                <div class="system-card">
+                    <h3>CPU</h3>
+                    <div class="metric">
+                        <span class="metric-label">Usage:</span>
+                        <span class="metric-value" id="cpuUsage">--</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Temperature:</span>
+                        <span class="metric-value" id="cpuTemp">--</span>
+                    </div>
+                </div>
+                <div class="system-card">
+                    <h3>Memory</h3>
+                    <div class="metric">
+                        <span class="metric-label">Usage:</span>
+                        <span class="metric-value" id="memoryUsage">--</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="memoryProgress"></div>
+                    </div>
+                </div>
+                <div class="system-card">
+                    <h3>Uptime</h3>
+                    <div class="metric">
+                        <span class="metric-value" id="uptime">--</span>
+                    </div>
+                </div>
+                <div class="system-card">
+                    <h3>Last Update</h3>
+                    <div class="metric">
+                        <span class="metric-value" id="lastUpdate">--</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- GPIO Status Grid -->
+        <section class="gpio-panel">
+            <h2><i class="icon">⚡</i> GPIO Pin Status</h2>
+            <div class="gpio-grid" id="gpioGrid">
+                <!-- GPIO pins will be populated here -->
+            </div>
+        </section>
+
+        <!-- Transition Counters -->
+        <section class="counters-panel">
+            <h2><i class="icon">🔢</i> Transition Counters</h2>
+            <div class="counters-grid" id="countersGrid">
+                <!-- Counters will be populated here -->
+            </div>
+        </section>
+
+        <!-- Duration Charts -->
+        <section class="charts-panel">
+            <h2><i class="icon">📈</i> Pin Duration Charts</h2>
+            <div class="chart-controls">
+                <select id="chartPinSelect">
+                    <option value="">Select a pin to view chart</option>
+                </select>
+                <select id="chartTimeRange">
+                    <option value="1">Last 1 hour</option>
+                    <option value="6">Last 6 hours</option>
+                    <option value="24">Last 24 hours</option>
+                </select>
+            </div>
+            <div class="chart-container">
+                <canvas id="durationChart"></canvas>
+            </div>
+        </section>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

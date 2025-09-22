@@ -1,0 +1,43 @@
+{
+    "pins_to_monitor": [2, 3, 4, 17, 27, 22, 10, 9, 11, 5, 6, 13, 19, 26, 14, 15, 18, 23, 24, 25, 8, 7, 12, 16, 20, 21],
+    "update_interval": 0.1,
+    "history_duration_minutes": 60,
+    "pin_labels": {
+        "2": "SDA",
+        "3": "SCL",
+        "4": "GPIO 4",
+        "17": "GPIO 17",
+        "27": "GPIO 27",
+        "22": "GPIO 22",
+        "10": "MOSI",
+        "9": "MISO",
+        "11": "SCLK",
+        "5": "GPIO 5",
+        "6": "GPIO 6",
+        "13": "GPIO 13",
+        "19": "GPIO 19",
+        "26": "GPIO 26",
+        "14": "TXD",
+        "15": "RXD",
+        "18": "GPIO 18",
+        "23": "GPIO 23",
+        "24": "GPIO 24",
+        "25": "GPIO 25",
+        "8": "CE0",
+        "7": "CE1",
+        "12": "GPIO 12",
+        "16": "GPIO 16",
+        "20": "GPIO 20",
+        "21": "GPIO 21"
+    },
+    "web_server": {
+        "host": "0.0.0.0",
+        "port": 5000,
+        "debug": false
+    },
+    "monitoring": {
+        "gpio_update_interval_seconds": 1,
+        "system_update_interval_seconds": 5,
+        "chart_max_points": 1000
+    }
+}
