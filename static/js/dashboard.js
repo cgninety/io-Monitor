@@ -13,6 +13,15 @@ class GPIODashboard {
         this.initializeSocket();
         this.setupEventListeners();
         this.initializeChart();
+        this.setupAutoRefresh();
+    }
+    
+    setupAutoRefresh() {
+        // Refresh the entire page every 10 seconds
+        setInterval(() => {
+            console.log('Auto-refreshing page...');
+            window.location.reload();
+        }, 10000); // 10 seconds = 10000 milliseconds
     }
     
     initializeSocket() {
