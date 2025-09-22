@@ -38,16 +38,14 @@ class GPIODashboard {
         
         // Data event handlers with immediate processing
         this.socket.on('gpio_update', (data) => {
+            console.log('GPIO UPDATE RECEIVED:', new Date().toLocaleTimeString(), data);
             // Process immediately without any delays
-            requestAnimationFrame(() => {
-                this.updateGPIOStatus(data);
-            });
+            this.updateGPIOStatus(data);
         });
         
         this.socket.on('system_update', (data) => {
-            requestAnimationFrame(() => {
-                this.updateSystemInfo(data);
-            });
+            console.log('SYSTEM UPDATE RECEIVED:', new Date().toLocaleTimeString());
+            this.updateSystemInfo(data);
         });
         
         this.socket.on('pin_history', (data) => {
@@ -104,10 +102,12 @@ class GPIODashboard {
     }
     
     updateGPIOStatus(data) {
+        console.log('UPDATING GPIO STATUS:', new Date().toLocaleTimeString());
         this.currentPinData = data;
         this.renderGPIOGridOptimized(data);
         this.renderCountersGrid(data);
         this.updateChartPinSelect(data);
+        console.log('GPIO STATUS UPDATE COMPLETE');
     }
     
     renderGPIOGridOptimized(data) {
@@ -181,6 +181,7 @@ class GPIODashboard {
         // Update class for state change with immediate visual feedback
         const newClassName = `gpio-pin state-${pinData.state ? 'high' : 'low'}`;
         if (element.className !== newClassName) {
+            console.log(`PIN ${pin} STATE CHANGE: ${element.className} -> ${newClassName}`);
             element.className = newClassName;
             // Add a quick flash effect for state changes
             element.style.transform = 'scale(1.1)';
